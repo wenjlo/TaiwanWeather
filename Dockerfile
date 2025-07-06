@@ -6,7 +6,7 @@ WORKDIR /app
 
 # 將 requirements.txt 複製到容器中並安裝依賴
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # 將應用程式程式碼複製到容器中
 COPY . .
