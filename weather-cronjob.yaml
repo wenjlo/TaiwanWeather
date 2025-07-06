@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: weather-data-inserter-cronjob
+spec:
+  # Cron 排程：
+  # 例如 "0 * * * *" 表示每小時的第 0 分鐘執行一次。
+  # 格式：分 時 日 月 週
+  # 你可以根據需求修改這個排程。
+  # 範例：
+  # "*/5 * * * *" 每 5 分鐘執行一次
+  # "0 0 * * *" 每天午夜執行一次
+  schedule: "*/5 * * * *" # 每小時執行一次
+
+  # 如果前一個 Job 仍在運行，是否跳過新的 Job
+  # Allow：允許同時運行多個 Job
+  # Forbid：不允許同時運行，如果前一個還在跑，則跳過新的
+  # Replace：替換正在運行的 Job，用新的 Job 替換舊的
+  concurrencyPolicy: Forbid
+
+  # Job 失敗後重試的次數
+  failedJobsHistoryLimit: 1 # 保留一個失敗的 Job 歷史記錄
+
+  # Job 成功後保留的歷史記錄數量
+  successfulJobsHistoryLimit: 3 # 保留三個成功的 Job 歷史記錄
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: weather-inserter-container
+              image: weather-data-inserter:0.1 # 使用我們將要建立的 Docker 映像名稱
+              # imagePullPolicy: Never 表示 Kubernetes 不會嘗試從遠端倉庫拉取映像，
+              # 而是使用本地可用的映像。這對於 Minikube 的本地映像很重要。
+              imagePullPolicy: Never
+
+              # 設定環境變數，用於 Python 腳本連接 MySQL
+              env:
+                - name: MYSQL_HOST
+                  value: mysql-service # **重要：這是 MySQL Service 的名稱，不是 Minikube IP**
+                - name: MYSQL_PORT
+                  value: "3306"
+                - name: MYSQL_USER
+                  value: root
+                - name: MYSQL_DATABASE
+                  value: your_database_name # 替換為你的資料庫名稱
+                - name: MYSQL_PASSWORD
+                  # 推薦使用 Secret 來安全地儲存密碼
+                  # 首先你需要建立一個 Secret：
+                  # kubectl create secret generic mysql-root-password --from-literal=MYSQL_PASSWORD='your_root_password'
+                  valueFrom:
+                    secretKeyRef:
+                      name: mysql-root-password # Secret 的名稱
+                      key: MYSQL_PASSWORD       # Secret 中鍵的名稱
+
+              # 為容器設定資源請求和限制，避免「吵鬧的鄰居」問題
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "200m"
+          restartPolicy: OnFailure # 如果容器失敗，Pod 會重啟，直到 Job 成功或達到重試限制
