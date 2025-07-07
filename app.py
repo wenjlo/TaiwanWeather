@@ -9,7 +9,7 @@ def main():
         f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization={TOKEN}&format=JSON")
     js_file = json.loads(data.text)
     columns_name = ['record_time', 'station_id', 'station_name', 'station_latitude', 'station_longitude',
-                    'county_name', 'town_name', 'weather_description']
+                    'country_name', 'town_name', 'weather_description']
     df = pd.DataFrame(columns=columns_name)
     for js in js_file['records']['Station']:
         d = pd.DataFrame(
@@ -20,7 +20,7 @@ def main():
         df = pd.concat([df, d], axis=0)
 
     mysql = Mysql()
-    mysql.write(df, 'station_weather_data', 'weather')
+    mysql.write(df, 'weather_records', 'weather')
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
