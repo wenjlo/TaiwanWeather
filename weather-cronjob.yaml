@@ -10,7 +10,7 @@ spec:
   # 範例：
   # "*/5 * * * *" 每 5 分鐘執行一次
   # "0 0 * * *" 每天午夜執行一次
-  schedule: "*/5 * * * *" # 每小時執行一次
+  schedule: "5 * * * *" # 每小時執行一次
 
   # 如果前一個 Job 仍在運行，是否跳過新的 Job
   # Allow：允許同時運行多個 Job
@@ -30,7 +30,7 @@ spec:
         spec:
           containers:
             - name: weather-inserter-container
-              image: weather-records-job:v1.0 # 使用我們將要建立的 Docker 映像名稱
+              image: weather-records-job:v2.0 # 使用我們將要建立的 Docker 映像名稱
               # imagePullPolicy: Never 表示 Kubernetes 不會嘗試從遠端倉庫拉取映像，
               # 而是使用本地可用的映像。這對於 Minikube 的本地映像很重要。
               imagePullPolicy: Never
@@ -51,7 +51,7 @@ spec:
                   # kubectl create secret generic mysql-root-password --from-literal=MYSQL_PASSWORD='your_root_password'
                   valueFrom:
                     secretKeyRef:
-                      name: mysql-password-config # Secret 的名稱
+                      name: mysql-password-secret # Secret 的名稱
                       key: MYSQL_PASSWORD       # Secret 中鍵的名稱
 
               # 為容器設定資源請求和限制，避免「吵鬧的鄰居」問題

@@ -2,3 +2,4 @@
 .venv
 .config.py
 debug.ipynb
+__pycache__

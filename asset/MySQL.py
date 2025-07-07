@@ -3,6 +3,7 @@ import mysql.connector
 from datetime import datetime
 from config import DB_USER,DB_PASSWORD,DB_IP
 from sqlalchemy import create_engine
+import os
 
 
 def insert_with_ignore(table, conn, keys, data_iter):
@@ -43,7 +44,7 @@ class Mysql:
             'host': DB_IP,  # 如果是透過 kubectl port-forward 連接，則為 127.0.0.1
             'port': 3306,  # 如果是透過 kubectl port-forward 連接，則為 3306
             'user': DB_USER,  # 您的 MySQL 用戶名
-            'password': DB_PASSWORD,  # 您的 MySQL 密碼
+            'password': os.environ.get("MYSQL_PASSWORD"),  # 您的 MySQL 密碼
             'database': None  # 您的資料庫名稱
         }
         self.ip = DB_IP
@@ -64,7 +65,7 @@ class Mysql:
 
         print("開始 插入資料 (帶有 INSERT IGNORE)...")
         data_frame.to_sql(
-            name='station_weather_data',
+            name=table_name,
             con=engine,
             if_exists='append',  # 這裡的 'append' 只是 to_sql 的一個要求，實際行為由 method 決定
             index=False,
