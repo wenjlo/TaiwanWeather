@@ -14,7 +14,7 @@ weather_description : weather description like :
 Deploy commands : (in kubernetes or minikube)
 ```
 eval $(minikube docker-env) # If you are using minikube.
-kubectl apply -f mysql-password-secret.yaml # Config map with your mysql password.
+kubectl apply -f mysql-password-secret.yaml # Scecret with your mysql password.
 
 docker build -t weather-records-job:v1.0 .
 kubectl apply -f cronjob.yaml
